@@ -1,10 +1,22 @@
+import 'package:belajar_flutter_get/app/core/theme/app_colors.dart';
 import 'package:belajar_flutter_get/app/data/models/todo_model.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
   final RxList<TodoModel> todos = <TodoModel>[].obs;
   final RxString filterStatus = 'all'.obs; // 'all', 'active', 'completed'
   final RxString filterPriority = 'all'.obs; // 'all', 'low', 'medium', 'high'
+
+  // Theme
+  final RxBool isDarkMode = true.obs;
+
+  void toggleTheme() {
+    isDarkMode.value = !isDarkMode.value;
+
+    AppColors.setTheme(dark: isDarkMode.value);
+    Get.changeThemeMode(isDarkMode.value ? ThemeMode.dark : ThemeMode.light);
+  }
 
   // Stats
   int get totalTodos => todos.length;
@@ -153,5 +165,4 @@ class HomeController extends GetxController {
   void setPriorityFilter(String priority) {
     filterPriority.value = priority;
   }
-
 }

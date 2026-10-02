@@ -1,3 +1,4 @@
+import 'package:belajar_flutter_get/app/core/theme/app_colors.dart';
 import 'package:belajar_flutter_get/app/data/models/todo_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,22 +10,26 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildStatsRow(),
-            _buildFilterBar(),
-            Expanded(child: _buildTodoList()),
-          ],
+    return Obx(() {
+      AppColors.isDark;
+      return Scaffold(
+        backgroundColor: AppColors.scaffoldBg,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              _buildStatsRow(),
+              _buildFilterBar(),
+              Expanded(child: _buildTodoList()),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: _buildFab(),
-    );
+        floatingActionButton: _buildFab(),
+      );
+    });
   }
 
+  // ─────────────────── HEADER ───────────────────
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -36,7 +41,7 @@ class HomeView extends GetView<HomeController> {
               Text(
                 'My Tasks',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
@@ -46,8 +51,8 @@ class HomeView extends GetView<HomeController> {
               Obx(
                 () => Text(
                   '${controller.activeTodos} tugas tersisa',
-                  style: const TextStyle(
-                    color: Color(0xFF8B8FA8),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
                     fontSize: 14,
                   ),
                 ),
@@ -55,6 +60,45 @@ class HomeView extends GetView<HomeController> {
             ],
           ),
           const Spacer(),
+          // Theme toggle button
+          Obx(
+            () => GestureDetector(
+              onTap: controller.toggleTheme,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) => RotationTransition(
+                      turns: animation,
+                      child: FadeTransition(opacity: animation, child: child),
+                    ),
+                    child: controller.isDarkMode.value
+                        ? const Icon(
+                            Icons.light_mode_rounded,
+                            key: ValueKey('light'),
+                            color: Color(0xFFFFBE0B),
+                            size: 22,
+                          )
+                        : const Icon(
+                            Icons.dark_mode_rounded,
+                            key: ValueKey('dark'),
+                            color: Color(0xFF6C63FF),
+                            size: 22,
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
           Container(
             width: 48,
             height: 48,
@@ -75,6 +119,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // ─────────────────── STATS ───────────────────
   Widget _buildStatsRow() {
     return Obx(() {
       final total = controller.totalTodos;
@@ -158,17 +203,18 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // ─────────────────── FILTER BAR ───────────────────
   Widget _buildFilterBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status filter
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Obx(
-              () => Row(
+            child: Obx(() {
+              AppColors.isDark; // track AppColors._isDark for theme changes
+              return Row(
                 children: [
                   _buildFilterChip(
                     'Semua',
@@ -189,15 +235,15 @@ class HomeView extends GetView<HomeController> {
                     controller.setFilter,
                   ),
                 ],
-              ),
-            ),
+              );
+            }),
           ),
           const SizedBox(height: 10),
-          // Priority filter
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Obx(
-              () => Row(
+            child: Obx(() {
+              AppColors.isDark; // track AppColors._isDark for theme changes
+              return Row(
                 children: [
                   _buildPriorityFilterChip(
                     'Semua',
@@ -220,8 +266,8 @@ class HomeView extends GetView<HomeController> {
                     controller.filterPriority.value,
                   ),
                 ],
-              ),
-            ),
+              );
+            }),
           ),
         ],
       ),
@@ -242,18 +288,16 @@ class HomeView extends GetView<HomeController> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFF1E1E30),
+          color: isSelected ? AppColors.primary : AppColors.cardBg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected
-                ? const Color(0xFF6C63FF)
-                : const Color(0xFF2E2E45),
+            color: isSelected ? AppColors.primary : AppColors.border,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF8B8FA8),
+            color: isSelected ? Colors.white : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             fontSize: 13,
           ),
@@ -264,7 +308,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildPriorityFilterChip(String label, String value, String current) {
     final isSelected = current == value;
-    Color priorityColor = _getPriorityColor(value);
+    final color = _getPriorityColor(value);
     return GestureDetector(
       onTap: () => controller.setPriorityFilter(value),
       child: AnimatedContainer(
@@ -272,13 +316,9 @@ class HomeView extends GetView<HomeController> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected
-              ? priorityColor.withValues(alpha: 0.2)
-              : const Color(0xFF1E1E30),
+          color: isSelected ? color.withValues(alpha: 0.15) : AppColors.cardBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? priorityColor : const Color(0xFF2E2E45),
-          ),
+          border: Border.all(color: isSelected ? color : AppColors.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -287,17 +327,14 @@ class HomeView extends GetView<HomeController> {
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
-                  color: priorityColor,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: 6),
             ],
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? priorityColor : const Color(0xFF8B8FA8),
+                color: isSelected ? color : AppColors.textSecondary,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 fontSize: 12,
               ),
@@ -308,18 +345,16 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // ─────────────────── TODO LIST ───────────────────
   Widget _buildTodoList() {
     return Obx(() {
+      AppColors.isDark; // track AppColors._isDark for theme changes
       final items = controller.filteredTodos;
-      if (items.isEmpty) {
-        return _buildEmptyState();
-      }
+      if (items.isEmpty) return _buildEmptyState();
       return ListView.builder(
         padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
         itemCount: items.length,
-        itemBuilder: (context, index) {
-          return _buildTodoCard(items[index]);
-        },
+        itemBuilder: (context, index) => _buildTodoCard(items[index]),
       );
     });
   }
@@ -329,24 +364,20 @@ class HomeView extends GetView<HomeController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.task_alt_rounded,
-            size: 80,
-            color: const Color(0xFF2E2E45),
-          ),
+          Icon(Icons.task_alt_rounded, size: 80, color: AppColors.border),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Tidak ada tugas',
             style: TextStyle(
-              color: Color(0xFF8B8FA8),
+              color: AppColors.textSecondary,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Tekan + untuk menambahkan tugas baru',
-            style: TextStyle(color: Color(0xFF5A5A7A), fontSize: 13),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
         ],
       ),
@@ -375,20 +406,30 @@ class HomeView extends GetView<HomeController> {
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.surfaceBg,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: todo.isCompleted
-                  ? const Color(0xFF2E2E45)
+                  ? AppColors.border
                   : priorityColor.withValues(alpha: 0.4),
               width: 1.5,
             ),
+            boxShadow: AppColors.isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Checkbox
                 GestureDetector(
                   onTap: () => controller.toggleTodo(todo.id),
                   child: AnimatedContainer(
@@ -398,12 +439,12 @@ class HomeView extends GetView<HomeController> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: todo.isCompleted
-                          ? const Color(0xFF6C63FF)
+                          ? AppColors.primary
                           : Colors.transparent,
                       border: Border.all(
                         color: todo.isCompleted
-                            ? const Color(0xFF6C63FF)
-                            : const Color(0xFF3E3E5E),
+                            ? AppColors.primary
+                            : AppColors.borderSubtle,
                         width: 2,
                       ),
                     ),
@@ -417,6 +458,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
                 const SizedBox(width: 14),
+                // Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,14 +467,14 @@ class HomeView extends GetView<HomeController> {
                         todo.title,
                         style: TextStyle(
                           color: todo.isCompleted
-                              ? const Color(0xFF5A5A7A)
-                              : Colors.white,
+                              ? AppColors.textMuted
+                              : AppColors.textPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           decoration: todo.isCompleted
                               ? TextDecoration.lineThrough
                               : null,
-                          decorationColor: const Color(0xFF5A5A7A),
+                          decorationColor: AppColors.textMuted,
                         ),
                       ),
                       if (todo.description.isNotEmpty) ...[
@@ -441,8 +483,8 @@ class HomeView extends GetView<HomeController> {
                           todo.description,
                           style: TextStyle(
                             color: todo.isCompleted
-                                ? const Color(0xFF3E3E5E)
-                                : const Color(0xFF8B8FA8),
+                                ? AppColors.border
+                                : AppColors.textSecondary,
                             fontSize: 12,
                           ),
                           maxLines: 2,
@@ -475,14 +517,14 @@ class HomeView extends GetView<HomeController> {
                           const SizedBox(width: 8),
                           Icon(
                             Icons.access_time_rounded,
-                            color: const Color(0xFF5A5A7A),
+                            color: AppColors.textMuted,
                             size: 12,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             _formatDate(todo.createdAt),
-                            style: const TextStyle(
-                              color: Color(0xFF5A5A7A),
+                            style: TextStyle(
+                              color: AppColors.textMuted,
                               fontSize: 11,
                             ),
                           ),
@@ -493,9 +535,9 @@ class HomeView extends GetView<HomeController> {
                 ),
                 GestureDetector(
                   onTap: () => _showEditDialog(todo),
-                  child: const Icon(
+                  child: Icon(
                     Icons.edit_rounded,
-                    color: Color(0xFF3E3E5E),
+                    color: AppColors.borderSubtle,
                     size: 18,
                   ),
                 ),
@@ -507,10 +549,11 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // ─────────────────── FAB ───────────────────
   Widget _buildFab() {
     return FloatingActionButton.extended(
-      onPressed: () => _showAddDialog(),
-      backgroundColor: const Color(0xFF6C63FF),
+      onPressed: _showAddDialog,
+      backgroundColor: AppColors.primary,
       elevation: 8,
       icon: const Icon(Icons.add_rounded, color: Colors.white),
       label: const Text(
@@ -520,6 +563,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // ─────────────────── DIALOGS ───────────────────
   void _showAddDialog() {
     final titleController = TextEditingController();
     final descController = TextEditingController();
@@ -591,9 +635,9 @@ class HomeView extends GetView<HomeController> {
         bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A1A2E),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -606,7 +650,7 @@ class HomeView extends GetView<HomeController> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3E3E5E),
+                  color: AppColors.borderSubtle,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -616,8 +660,8 @@ class HomeView extends GetView<HomeController> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -629,7 +673,7 @@ class HomeView extends GetView<HomeController> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.15),
+                        color: Colors.red.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
@@ -642,7 +686,6 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
             const SizedBox(height: 20),
-            // Title field
             _buildTextField(
               controller: titleController,
               label: 'Judul Tugas',
@@ -650,7 +693,6 @@ class HomeView extends GetView<HomeController> {
               icon: Icons.title_rounded,
             ),
             const SizedBox(height: 14),
-            // Description field
             _buildTextField(
               controller: descController,
               label: 'Deskripsi (opsional)',
@@ -659,11 +701,10 @@ class HomeView extends GetView<HomeController> {
               maxLines: 3,
             ),
             const SizedBox(height: 16),
-            // Priority selector
-            const Text(
+            Text(
               'Prioritas',
               style: TextStyle(
-                color: Color(0xFF8B8FA8),
+                color: AppColors.textSecondary,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -681,13 +722,12 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
             const SizedBox(height: 24),
-            // Submit button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: onSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C63FF),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -723,8 +763,8 @@ class HomeView extends GetView<HomeController> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF8B8FA8),
+          style: TextStyle(
+            color: AppColors.textSecondary,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -733,23 +773,20 @@ class HomeView extends GetView<HomeController> {
         TextField(
           controller: controller,
           maxLines: maxLines,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF5A5A7A)),
-            prefixIcon: Icon(icon, color: const Color(0xFF6C63FF), size: 20),
+            hintStyle: TextStyle(color: AppColors.textMuted),
+            prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
             filled: true,
-            fillColor: const Color(0xFF0F0F1A),
+            fillColor: AppColors.inputBg,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Color(0xFF6C63FF),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16,
@@ -772,12 +809,10 @@ class HomeView extends GetView<HomeController> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? color.withValues(alpha: 0.2)
-                : const Color(0xFF0F0F1A),
+                ? color.withValues(alpha: 0.15)
+                : AppColors.inputBg,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? color : const Color(0xFF2E2E45),
-            ),
+            border: Border.all(color: isSelected ? color : AppColors.border),
           ),
           child: Column(
             children: [
@@ -790,7 +825,7 @@ class HomeView extends GetView<HomeController> {
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? color : const Color(0xFF8B8FA8),
+                  color: isSelected ? color : AppColors.textSecondary,
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
@@ -802,16 +837,17 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // ─────────────────── HELPERS ───────────────────
   Color _getPriorityColor(String priority) {
     switch (priority) {
       case 'high':
-        return const Color(0xFFFF6B6B);
+        return AppColors.high;
       case 'medium':
-        return const Color(0xFFFFBE0B);
+        return AppColors.medium;
       case 'low':
-        return const Color(0xFF4ECDC4);
+        return AppColors.low;
       default:
-        return const Color(0xFF8B8FA8);
+        return AppColors.textSecondary;
     }
   }
 
