@@ -13,7 +13,7 @@ class TodoModel {
     this.isCompleted = false,
     required this.createdAt,
     this.priority = 'medium',
-  });
+  });//Constructor
 
   TodoModel copyWith({
     String? id,
@@ -30,6 +30,30 @@ class TodoModel {
       isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
       priority: priority ?? this.priority,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'isCompleted': isCompleted,
+      'createdAt': createdAt.toIso8601String(),
+      'priority': priority,
+    };
+  }
+
+  factory TodoModel.fromJson(Map<String, dynamic> json) {
+    return TodoModel(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String? ?? '',
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      priority: json['priority'] as String? ?? 'medium',
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:belajar_flutter_get/app/core/theme/app_colors.dart';
 import 'package:belajar_flutter_get/app/data/models/todo_model.dart';
+import 'package:belajar_flutter_get/app/data/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -99,20 +100,65 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF6C63FF), Color(0xFF48C6EF)],
-              ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.check_circle_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
+          // Storage Provider Switcher Button (Bisa ganti antara GetStorage & SharedPreferences)
+          Obx(
+            () {
+              final isGetStorage =
+                  controller.activeStorageType.value == StorageProviderType.getStorage;
+              return GestureDetector(
+                onTap: () {
+                  controller.switchStorageProvider(
+                    isGetStorage
+                        ? StorageProviderType.sharedPreferences
+                        : StorageProviderType.getStorage,
+                  );
+                },
+                child: Tooltip(
+                  message: 'Klik untuk beralih storage: ${controller.currentStorage.name}',
+                  child: Container(
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isGetStorage
+                            ? const [Color(0xFF6C63FF), Color(0xFF48C6EF)]
+                            : const [Color(0xFFFF9F43), Color(0xFFFF5252)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isGetStorage
+                                  ? const Color(0xFF6C63FF)
+                                  : const Color(0xFFFF9F43))
+                              .withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isGetStorage ? Icons.bolt_rounded : Icons.inventory_2_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          isGetStorage ? 'GetStorage' : 'SharedPref',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
