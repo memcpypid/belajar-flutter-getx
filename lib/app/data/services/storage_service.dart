@@ -3,10 +3,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/todo_model.dart';
 
-enum StorageProviderType {
-  getStorage,
-  sharedPreferences,
-}
+enum StorageProviderType { getStorage, sharedPreferences }
 
 /// Kontrak (Interface) untuk abstraksi Local Storage
 abstract class BaseStorageService {
@@ -21,7 +18,7 @@ abstract class BaseStorageService {
 }
 
 /// ===============================================================
-/// 1. IMPLEMENTASI DENGAN GET STORAGE ⚡
+/// 1. IMPLEMENTASI DENGAN GET STORAGE
 /// ===============================================================
 /// Karakteristik:
 /// - Sangat ringkas, dibuat khusus untuk ekosistem GetX.
@@ -37,7 +34,7 @@ class GetStorageService implements BaseStorageService {
   StorageProviderType get type => StorageProviderType.getStorage;
 
   @override
-  String get name => "GetStorage ⚡";
+  String get name => "GetStorage";
 
   @override
   Future<void> init() async {
@@ -56,7 +53,9 @@ class GetStorageService implements BaseStorageService {
 
     // rawData langsung berupa List of Map, tinggal di-mapping
     return rawData
-        .map((item) => TodoModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .map(
+          (item) => TodoModel.fromJson(Map<String, dynamic>.from(item as Map)),
+        )
         .toList();
   }
 
@@ -79,7 +78,7 @@ class GetStorageService implements BaseStorageService {
 }
 
 /// ===============================================================
-/// 2. IMPLEMENTASI DENGAN SHARED PREFERENCES 📦
+/// 2. IMPLEMENTASI DENGAN SHARED PREFERENCES
 /// ===============================================================
 /// Karakteristik:
 /// - Plugin resmi Flutter (Official).
@@ -96,7 +95,7 @@ class SharedPrefService implements BaseStorageService {
   StorageProviderType get type => StorageProviderType.sharedPreferences;
 
   @override
-  String get name => "SharedPreferences 📦";
+  String get name => "SharedPreferences";
 
   @override
   Future<void> init() async {

@@ -10,12 +10,13 @@ class HomeController extends GetxController {
   final SharedPrefService _sharedPrefService = SharedPrefService();
 
   // Storage aktif (bisa di-switch oleh user untuk demonstrasi)
-  final Rx<StorageProviderType> activeStorageType = StorageProviderType.getStorage.obs;
+  final Rx<StorageProviderType> activeStorageType =
+      StorageProviderType.getStorage.obs;
 
   BaseStorageService get currentStorage =>
       activeStorageType.value == StorageProviderType.getStorage
-          ? _getStorageService
-          : _sharedPrefService;
+      ? _getStorageService
+      : _sharedPrefService;
 
   // ─── STATE TODOS & FILTER ───
   final RxList<TodoModel> todos = <TodoModel>[].obs;
@@ -79,7 +80,6 @@ class HomeController extends GetxController {
       todos.assignAll(loaded);
     } else {
       // Jika storage masih kosong (user baru), pakai sample todos lalu simpan
-      _addSampleTodos();
       await saveTodosToStorage();
     }
   }
@@ -123,42 +123,42 @@ class HomeController extends GetxController {
     await _sharedPrefService.saveTheme(isDarkMode.value);
   }
 
-  void _addSampleTodos() {
-    todos.addAll([
-      TodoModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: 'Belajar Flutter GetX',
-        description: 'Pelajari state management menggunakan GetX',
-        isCompleted: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        priority: 'high',
-      ),
-      TodoModel(
-        id: (DateTime.now().millisecondsSinceEpoch + 1).toString(),
-        title: 'Membuat aplikasi Todo List',
-        description: 'Buat aplikasi todo list dengan fitur CRUD lengkap',
-        isCompleted: false,
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        priority: 'high',
-      ),
-      TodoModel(
-        id: (DateTime.now().millisecondsSinceEpoch + 2).toString(),
-        title: 'Belajar GetStorage & SharedPref',
-        description: 'Pahami perbedaan implementasi keduanya di Flutter',
-        isCompleted: false,
-        createdAt: DateTime.now(),
-        priority: 'medium',
-      ),
-      TodoModel(
-        id: (DateTime.now().millisecondsSinceEpoch + 3).toString(),
-        title: 'Implementasi Local Persistence',
-        description: 'Simpan data agar tidak hilang saat app restart',
-        isCompleted: false,
-        createdAt: DateTime.now(),
-        priority: 'low',
-      ),
-    ]);
-  }
+  // void _addSampleTodos() {
+  //   todos.addAll([
+  //     TodoModel(
+  //       id: DateTime.now().millisecondsSinceEpoch.toString(),
+  //       title: 'Belajar Flutter GetX',
+  //       description: 'Pelajari state management menggunakan GetX',
+  //       isCompleted: true,
+  //       createdAt: DateTime.now().subtract(const Duration(days: 2)),
+  //       priority: 'high',
+  //     ),
+  //     TodoModel(
+  //       id: (DateTime.now().millisecondsSinceEpoch + 1).toString(),
+  //       title: 'Membuat aplikasi Todo List',
+  //       description: 'Buat aplikasi todo list dengan fitur CRUD lengkap',
+  //       isCompleted: false,
+  //       createdAt: DateTime.now().subtract(const Duration(days: 1)),
+  //       priority: 'high',
+  //     ),
+  //     TodoModel(
+  //       id: (DateTime.now().millisecondsSinceEpoch + 2).toString(),
+  //       title: 'Belajar GetStorage & SharedPref',
+  //       description: 'Pahami perbedaan implementasi keduanya di Flutter',
+  //       isCompleted: false,
+  //       createdAt: DateTime.now(),
+  //       priority: 'medium',
+  //     ),
+  //     TodoModel(
+  //       id: (DateTime.now().millisecondsSinceEpoch + 3).toString(),
+  //       title: 'Implementasi Local Persistence',
+  //       description: 'Simpan data agar tidak hilang saat app restart',
+  //       isCompleted: false,
+  //       createdAt: DateTime.now(),
+  //       priority: 'low',
+  //     ),
+  //   ]);
+  // }
 
   void addTodo({
     required String title,
@@ -176,7 +176,7 @@ class HomeController extends GetxController {
     );
     todos.insert(0, todo);
 
-    // 💾 Simpan perubahan ke storage
+    // Simpan perubahan ke storage
     await saveTodosToStorage();
 
     Get.snackbar(
@@ -194,7 +194,7 @@ class HomeController extends GetxController {
       todos[index] = todo.copyWith(isCompleted: !todo.isCompleted);
       todos.refresh();
 
-      // 💾 Simpan perubahan ke storage
+      // Simpan perubahan ke storage
       await saveTodosToStorage();
     }
   }
@@ -204,7 +204,7 @@ class HomeController extends GetxController {
     if (todo != null) {
       todos.removeWhere((t) => t.id == id);
 
-      // 💾 Simpan perubahan ke storage
+      //  Simpan perubahan ke storage
       await saveTodosToStorage();
 
       Get.snackbar(
@@ -246,7 +246,7 @@ class HomeController extends GetxController {
 
   void clearCompleted() async {
     todos.removeWhere((t) => t.isCompleted);
-    // 💾 Simpan perubahan ke storage
+    // Simpan perubahan ke storage
     await saveTodosToStorage();
   }
 
